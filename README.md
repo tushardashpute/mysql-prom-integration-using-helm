@@ -1,7 +1,5 @@
 # How to Install Prometheus on Kubernetes Cluster?
 
-[YouTube Tutorial](https://youtu.be/bwUECsVDbMA)
-
 ## Steps
 
 ### 0. Create EKS Cluster (Optional)
@@ -91,7 +89,7 @@ svc/monitoring-grafana 3000:80 \
   - Kubernetes / Kubelet
   - USE Method / Cluster
 
-### 2. Deploy Postgres Helm Chart
+### 2. Deploy Mysql Helm Chart
 
 ```bash
 helm repo add bitnami https://charts.bitnami.com/bitnami
@@ -100,15 +98,16 @@ helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo update
 ```
 ```bash
-helm search repo postgresql --max-col-width 23
+helm search repo mysql --max-col-width 23
 ```
 
-- Download `postgres-values.yaml` file for **Postgres** from [here](https://github.com/bitnami/charts/tree/master/bitnami/postgresql)
+- Download `mysql-values.yaml` file for **Postgres** from [here](https://github.com/bitnami/charts/tree/master/bitnami/mysql)
 
 
 - Update following variables
 ```yaml
-postgresqlDatabase: test  # line 155
+auth:
+  database: test
 metrics:                  # line 734
   enabled: true
 serviceMonitor:           # line 744
@@ -118,10 +117,9 @@ serviceMonitor:           # line 744
 ```
 
 ```bash
-helm install postgres \
-bitnami/postgresql \
---values postgres-values.yaml \
---version 10.5.0 \
+helm install mysql \
+bitnami/mysql \
+--values mysql-values.yaml \
 --namespace db \
 --create-namespace
 ```
@@ -130,14 +128,14 @@ kubectl get pods -n db
 ```
 
 ### 3. Create Service Monitor for Postgres
-- Create `service-monitor.yaml`
+- Create `service-monitor_mysql.yaml`
 ```yaml
 ---
 # https://github.com/prometheus-operator/prometheus-operator
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: postgres-postgresql
+  name: mysql-servicemonitor
   namespace: db
   labels:
     <labels>
@@ -168,14 +166,14 @@ kubectl get services -n db
 ```
 
 ```bash
-kubectl describe endpoints postgres-postgresql-metrics -n db
+kubectl describe endpoints mysql-metrics -n db
 ```
 
 ```bash
-kubectl apply -f service-monitor.yaml
+kubectl apply -f service-monitor_mysql.yaml
 ```
 
-- Import Grafana dashboard `9628`
+- Import Grafana dashboard `14057`
 
 ## Clean Up
 ```bash
