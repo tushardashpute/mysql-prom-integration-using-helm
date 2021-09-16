@@ -1,0 +1,9 @@
+---
+auth:
+  database: test
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+    additionalLabels:
+      prometheus: devops
